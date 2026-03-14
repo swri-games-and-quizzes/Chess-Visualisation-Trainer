@@ -1,42 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Random Position from Master PGNs</title>
+  <title>Random Master Position</title>
 
-    <!-- Chessboard.js CSS -->
-    <link rel="stylesheet" 
-          href="https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/chessboard.min.css" />
+  <!-- chessboard.js CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chessboardjs@1.0.0/dist/chessboard.min.css">
 
-    <!-- Chess.js for FEN calculation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.13.4/chess.min.js"></script>
+  <!-- chess.js UMD build for browsers -->
+  <script src="https://cdn.jsdelivr.net/npm/chess.js@0.13.4/dist/chess.min.js"></script>
 
-    <!-- Chessboard.js for the board -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/chessboard.min.js"></script>
+  <!-- chessboard.js JS -->
+  <script src="https://cdn.jsdelivr.net/npm/chessboardjs@1.0.0/dist/chessboard.min.js"></script>
 
-    <style>
-        body {
-            font-family: Arial;
-            text-align: center;
-            padding: 40px;
-        }
-        #board {
-            width: 400px;
-            margin: 20px auto;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        pre {
-            font-size: 16px;
-        }
-    </style>
+  <style>
+    body { font-family: Arial; text-align: center; padding: 40px; }
+    #board { width: 400px; margin: 20px auto; }
+    button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+    pre { font-size: 16px; }
+  </style>
 </head>
 <body>
 
 <h2>Random Position From Your PGNs</h2>
-<button onclick="generate()">New Random Position</button>
+<button id="genBtn">New Random Position</button>
 
 <div id="board"></div>
 
@@ -44,60 +30,48 @@
 <pre id="moves"></pre>
 
 <script>
-    let board;
+let board;
 
-    // -------------------------
-    // Paste your 2 PGNs here
-    // -------------------------
-    const pgns = [
+// --- Your 2 PGNs ---
+const pgns = [
 `1. e4 g6 2. d4 Bg7 3. Nc3 e6 4. f4 Ne7 5. Nf3 d5 6. Bd3 O-O 7. O-O b6 8. Be3 a5 9. Qe1 Ba6 10. Bxa6 Nxa6 11. Rd1 Nb4 12. Qf2 dxe4 13. Nxe4 Nxa2 14. c3 a4 15. Ra1 Qd5 16. Ned2 b5`,
 `1. d4 d5 2. Bf4 c5 3. e3 cxd4 4. exd4 Nc6 5. c3 Bf5 6. Qb3 Qd7 7. Nf3 f6 8. Nbd2 g5 9. Bg3 h5 10. h3 Bg6 11. Be2 Nh6 12. O-O-O Nf5 13. Bh2 a6 14. Nf1 b5 15. Bd3 Rc8 16. Kb1 e6 17. Ne3 b4 18. Nxf5 Bxf5`
-    ];
+];
 
-    // Parse PGNs into Chess.js move arrays
-    const games = pgns.map(pgn => {
-        const chess = new Chess();
-        chess.load_pgn(pgn);
-        return chess.history(); // full moves in order
-    });
+// Parse PGNs into move arrays AFTER Chess is defined
+const games = pgns.map(pgn=>{
+  const chess = new Chess();
+  chess.load_pgn(pgn);
+  return chess.history();
+});
 
-    function generate() {
-        // Pick a random game
-        const gameIndex = Math.floor(Math.random() * games.length);
-        const moves = games[gameIndex];
+function generate() {
+  const gameIndex = Math.floor(Math.random()*games.length);
+  const moves = games[gameIndex];
 
-        // Ensure we can take 6 half-moves after the selected position
-        if (moves.length < 6) {
-            alert("Game too short!");
-            return;
-        }
+  if(moves.length < 6) { alert("Game too short"); return; }
 
-        // Random starting index that leaves 6 half-moves after it
-        const startIndex = Math.floor(Math.random() * (moves.length - 6));
+  const startIndex = Math.floor(Math.random()*(moves.length-6));
 
-        // Play moves up to startIndex
-        const chess = new Chess();
-        for (let i = 0; i < startIndex; i++) {
-            chess.move(moves[i]);
-        }
+  const chess = new Chess();
+  for(let i=0;i<startIndex;i++) chess.move(moves[i]);
 
-        // Display board
-        if (!board) {
-            board = Chessboard('board', {
-                position: chess.fen(),
-                draggable: false
-            });
-        } else {
-            board.position(chess.fen());
-        }
+  // Initialize or update chessboard
+  if(!board){
+    board = Chessboard('board',{position: chess.fen(), draggable: false});
+  } else {
+    board.position(chess.fen());
+  }
 
-        // Next 6 half moves
-        const next6 = moves.slice(startIndex, startIndex + 6);
-        document.getElementById("moves").textContent = next6.join(" ");
-    }
+  const next6 = moves.slice(startIndex,startIndex+6);
+  document.getElementById("moves").textContent = next6.join(" ");
+}
 
-    // Generate a position when page loads
-    generate();
+// Run when DOM is loaded
+window.onload = function(){
+  document.getElementById("genBtn").onclick = generate;
+  generate();
+}
 </script>
 
 </body>
