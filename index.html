@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Random Master Position</title>
+    <title>Random Master Position</title>
 
-  <!-- chessboard.js CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chessboardjs@1.0.0/dist/chessboard.min.css">
+    <!-- chessboard.js CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chessboardjs@1.0.0/dist/chessboard.min.css">
 
-  <!-- chess.js UMD build for browsers -->
-  <script src="https://cdn.jsdelivr.net/npm/chess.js@0.13.4/dist/chess.min.js"></script>
+    <!-- chess.js UMD (browser safe) -->
+    <script src="https://cdn.jsdelivr.net/npm/chess.js@0.10.3/chess.js"></script>
 
-  <!-- chessboard.js JS -->
-  <script src="https://cdn.jsdelivr.net/npm/chessboardjs@1.0.0/dist/chessboard.min.js"></script>
+    <!-- chessboard.js JS -->
+    <script src="https://cdn.jsdelivr.net/npm/chessboardjs@1.0.0/dist/chessboard.min.js"></script>
 
-  <style>
-    body { font-family: Arial; text-align: center; padding: 40px; }
-    #board { width: 400px; margin: 20px auto; }
-    button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
-    pre { font-size: 16px; }
-  </style>
+    <style>
+        body { font-family: Arial; text-align:center; padding:40px; }
+        #board { width: 400px; margin:20px auto; }
+        button { padding:10px 20px; font-size:16px; cursor:pointer; }
+        pre { font-size:16px; }
+    </style>
 </head>
 <body>
 
@@ -40,38 +40,36 @@ const pgns = [
 
 // Parse PGNs into move arrays AFTER Chess is defined
 const games = pgns.map(pgn=>{
-  const chess = new Chess();
-  chess.load_pgn(pgn);
-  return chess.history();
+    const chess = new Chess();
+    chess.load(pgn);  // chess.js 0.10.3 uses load(), not load_pgn()
+    return chess.history();
 });
 
 function generate() {
-  const gameIndex = Math.floor(Math.random()*games.length);
-  const moves = games[gameIndex];
+    const gameIndex = Math.floor(Math.random() * games.length);
+    const moves = games[gameIndex];
 
-  if(moves.length < 6) { alert("Game too short"); return; }
+    if (moves.length < 6) { alert("Game too short"); return; }
 
-  const startIndex = Math.floor(Math.random()*(moves.length-6));
+    const startIndex = Math.floor(Math.random()*(moves.length-6));
+    const chess = new Chess();
+    for(let i=0;i<startIndex;i++) chess.move(moves[i]);
 
-  const chess = new Chess();
-  for(let i=0;i<startIndex;i++) chess.move(moves[i]);
+    if(!board){
+        board = Chessboard('board',{position:chess.fen(), draggable:false});
+    } else {
+        board.position(chess.fen());
+    }
 
-  // Initialize or update chessboard
-  if(!board){
-    board = Chessboard('board',{position: chess.fen(), draggable: false});
-  } else {
-    board.position(chess.fen());
-  }
-
-  const next6 = moves.slice(startIndex,startIndex+6);
-  document.getElementById("moves").textContent = next6.join(" ");
+    const next6 = moves.slice(startIndex,startIndex+6);
+    document.getElementById("moves").textContent = next6.join(" ");
 }
 
-// Run when DOM is loaded
+// Ensure button works after DOM loads
 window.onload = function(){
-  document.getElementById("genBtn").onclick = generate;
-  generate();
-}
+    document.getElementById("genBtn").onclick = generate;
+    generate();
+};
 </script>
 
 </body>
