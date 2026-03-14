@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Random Master Position</title>
+<title>Random Master Position from PGNs</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.13.4/chess.min.js"></script>
+
 <style>
 body {
   font-family: Arial;
@@ -33,6 +36,8 @@ body {
 button {
   padding: 10px 20px;
   font-size: 16px;
+  margin-bottom: 20px;
+  cursor: pointer;
 }
 
 pre {
@@ -45,7 +50,7 @@ pre {
 </head>
 <body>
 
-<h2>Random Position From Master Games</h2>
+<h2>Random Position From Your PGNs</h2>
 <button onclick="generate()">New Random Position</button>
 
 <div id="board"></div>
@@ -54,90 +59,80 @@ pre {
 <pre id="moves"></pre>
 
 <script>
-// Sample master games (list of moves in algebraic notation)
-const games = [
-["e4","e5","Nf3","Nc6","Bb5","a6","Ba4","Nf6","O-O","Be7","Re1","b5","Bb3"],
-["d4","Nf6","c4","e6","Nc3","Bb4","e3","O-O","Bd3","d5","Nf3","c5"],
-["e4","c5","Nf3","d6","d4","cxd4","Nxd4","Nf6","Nc3","a6","Be3","e5","Nb3"],
-["c4","e5","Nc3","Nf6","g3","d5","cxd5","Nxd5","Bg2","Nb6","Nf3","Nc6"]
-];
-
 // Unicode symbols for pieces
 const pieces = {
   'P':'♙','N':'♘','B':'♗','R':'♖','Q':'♕','K':'♔',
   'p':'♟','n':'♞','b':'♝','r':'♜','q':'♛','k':'♚'
 };
 
-// Simple chessboard representation
-function drawBoard(position) {
+// Board drawing
+function drawBoard(fen) {
   const boardDiv = document.getElementById("board");
   boardDiv.innerHTML = "";
-  const files = ['a','b','c','d','e','f','g','h'];
-  for (let rank=8; rank>=1; rank--) {
-    for (let file=0; file<8; file++) {
-      const square = document.createElement("div");
+  const chess = new Chess(fen);
+  const boardObj = chess.board();
+  for(let rank=0; rank<8; rank++){
+    for(let file=0; file<8; file++){
+      const squareDiv = document.createElement("div");
       const isLight = (rank+file)%2===0;
-      square.className = "square "+(isLight?"light":"dark");
-      const key = files[file]+rank;
-      if(position[key]) square.textContent = pieces[position[key]];
-      boardDiv.appendChild(square);
+      squareDiv.className = "square "+(isLight?"light":"dark");
+      const piece = boardObj[rank][file];
+      if(piece) squareDiv.textContent = pieces[piece.color=== 'w'?piece.type.toUpperCase():piece.type];
+      boardDiv.appendChild(squareDiv);
     }
   }
 }
 
-// Very basic chess engine to keep track of positions
-class SimpleChess {
-  constructor() { this.reset(); }
-  reset() { 
-    // initial board mapping: piece at square
-    this.board = {
-      a1:'R',b1:'N',c1:'B',d1:'Q',e1:'K',f1:'B',g1:'N',h1:'R',
-      a2:'P',b2:'P',c2:'P',d2:'P',e2:'P',f2:'P',g2:'P',h2:'P',
-      a7:'p',b7:'p',c7:'p',d7:'p',e7:'p',f7:'p',g7:'p',h7:'p',
-      a8:'r',b8:'n',c8:'b',d8:'q',e8:'k',f8:'b',g8:'n',h8:'r'
-    };
-  }
-  move(move) {
-    // very simplified: only moves pawns/knights/bishops/rooks/queens/kings by basic algebraic, no castling
-    // expects moves like "e4", "Nf3"
-    if(move.length<2) return;
-    const files = ['a','b','c','d','e','f','g','h'];
-    const ranks = ['1','2','3','4','5','6','7','8'];
-    let from="",to="";
-    if(move.length===2){ // pawn move
-      const file=move[0]; const rank=move[1];
-      for(const sq in this.board){
-        if(this.board[sq]==='P' && sq[0]===file) {from=sq; break;}
-      }
-      to = move;
-    } else {
-      // e.g., Nf3
-      to = move.slice(-2);
-      const pieceChar = move[0];
-      for(const sq in this.board){
-        if(this.board[sq]===pieceChar) {from=sq; break;}
-      }
-    }
-    if(from && to) {
-      this.board[to]=this.board[from];
-      delete this.board[from];
-    }
-  }
-  getPosition() { return this.board; }
-}
+// ------------------------------
+// PASTE YOUR 2 PGNs HERE
+// ------------------------------
+const pgns = [
+`1. e4 g6 2. d4 Bg7 3. Nc3 e6 4. f4 Ne7 5. Nf3 d5 6. Bd3 O-O 7. O-O b6 8. Be3 a5 9. Qe1 Ba6 10. Bxa6 Nxa6 11. Rd1 Nb4 12. Qf2 dxe4 13. Nxe4 Nxa2 14. c3 a4 15. Ra1 Qd5 16. Ned2 b5`
+,
+`1. d4 d5 2. Bf4 c5 3. e3 cxd4 4. exd4 Nc6 5. c3 Bf5 6. Qb3 Qd7 7. Nf3 f6 8. Nbd2 g5 9. Bg3 h5 10. h3 Bg6 11. Be2 Nh6 12. O-O-O Nf5 13. Bh2 a6 14. Nf1 b5 15. Bd3 Rc8 16. Kb1 e6 17. Ne3 b4 18. Nxf5 Bxf5`
+];
 
-function generate() {
-  const game = games[Math.floor(Math.random()*games.length)];
-  const index = Math.floor(Math.random()*(game.length-6));
-  const next6 = game.slice(index,index+6);
-  const chess = new SimpleChess();
-  for(let i=0;i<index;i++) chess.move(game[i]);
-  drawBoard(chess.getPosition());
+// Parse PGNs into Chess.js games
+const games = pgns.map(pgnText=>{
+  const chess = new Chess();
+  chess.load_pgn(pgnText);
+  const moves = chess.history(); // full list of moves
+  return moves;
+});
+
+let boardFEN = null;
+
+function generate(){
+  // pick a random game
+  const gameIndex = Math.floor(Math.random()*games.length);
+  const moves = games[gameIndex];
+
+  if(moves.length < 6){
+    alert("Game too short for 6 half moves.");
+    return;
+  }
+
+  // pick a random starting move index leaving room for 6 half moves
+  const startIndex = Math.floor(Math.random()*(moves.length - 6));
+
+  // play moves up to startIndex
+  const chess = new Chess();
+  for(let i=0;i<startIndex;i++){
+    chess.move(moves[i]);
+  }
+
+  // save FEN
+  boardFEN = chess.fen();
+  drawBoard(boardFEN);
+
+  // next 6 half moves
+  const next6 = moves.slice(startIndex, startIndex+6);
   document.getElementById("moves").textContent = next6.join(" ");
 }
 
-// generate first position
+// generate first position on load
 generate();
+
 </script>
 
 </body>
