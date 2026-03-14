@@ -1,22 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>Random Master Position</title>
 
-    <!-- chessboard.js CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chessboardjs@1.0.0/dist/chessboard.min.css">
+    <!-- Local chessboard CSS -->
+    <link rel="stylesheet" href="chessboard.css">
 
-    <!-- chess.js UMD (browser safe) -->
-    <script src="https://cdn.jsdelivr.net/npm/chess.js@0.10.3/chess.js"></script>
-
-    <!-- chessboard.js JS -->
-    <script src="https://cdn.jsdelivr.net/npm/chessboardjs@1.0.0/dist/chessboard.min.js"></script>
+    <!-- Local chess.js and chessboard.js -->
+    <script src="chess.min.js"></script>
+    <script src="chessboard.js"></script>
 
     <style>
-        body { font-family: Arial; text-align:center; padding:40px; }
-        #board { width: 400px; margin:20px auto; }
-        button { padding:10px 20px; font-size:16px; cursor:pointer; }
-        pre { font-size:16px; }
+        body { font-family: Arial; text-align: center; padding: 40px; }
+        #board { width: 400px; margin: 20px auto; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+        pre { font-size: 16px; white-space: pre-wrap; word-wrap: break-word; }
     </style>
 </head>
 <body>
@@ -38,10 +37,10 @@ const pgns = [
 `1. d4 d5 2. Bf4 c5 3. e3 cxd4 4. exd4 Nc6 5. c3 Bf5 6. Qb3 Qd7 7. Nf3 f6 8. Nbd2 g5 9. Bg3 h5 10. h3 Bg6 11. Be2 Nh6 12. O-O-O Nf5 13. Bh2 a6 14. Nf1 b5 15. Bd3 Rc8 16. Kb1 e6 17. Ne3 b4 18. Nxf5 Bxf5`
 ];
 
-// Parse PGNs into move arrays AFTER Chess is defined
-const games = pgns.map(pgn=>{
+// Parse PGNs into arrays of moves
+const games = pgns.map(pgn => {
     const chess = new Chess();
-    chess.load(pgn);  // chess.js 0.10.3 uses load(), not load_pgn()
+    chess.load_pgn(pgn);
     return chess.history();
 });
 
@@ -49,24 +48,33 @@ function generate() {
     const gameIndex = Math.floor(Math.random() * games.length);
     const moves = games[gameIndex];
 
-    if (moves.length < 6) { alert("Game too short"); return; }
+    // Ensure there are at least 6 half-moves remaining
+    if (moves.length < 6) {
+        alert("Game too short!");
+        return;
+    }
 
-    const startIndex = Math.floor(Math.random()*(moves.length-6));
+    const startIndex = Math.floor(Math.random() * (moves.length - 6));
     const chess = new Chess();
-    for(let i=0;i<startIndex;i++) chess.move(moves[i]);
 
-    if(!board){
-        board = Chessboard('board',{position:chess.fen(), draggable:false});
+    for (let i = 0; i < startIndex; i++) {
+        chess.move(moves[i]);
+    }
+
+    // Initialize or update the board
+    if (!board) {
+        board = Chessboard('board', { position: chess.fen(), draggable: false });
     } else {
         board.position(chess.fen());
     }
 
-    const next6 = moves.slice(startIndex,startIndex+6);
+    // Display next 6 half-moves
+    const next6 = moves.slice(startIndex, startIndex + 6);
     document.getElementById("moves").textContent = next6.join(" ");
 }
 
-// Ensure button works after DOM loads
-window.onload = function(){
+// Setup button
+window.onload = function() {
     document.getElementById("genBtn").onclick = generate;
     generate();
 };
