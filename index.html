@@ -1,22 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Random Master Position</title>
+<meta charset="UTF-8">
+<title>Random Master Position</title>
 
-    <!-- Local chessboard CSS -->
-    <link rel="stylesheet" href="chessboard.css">
+<!-- Chessground CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chessground@8.1.0/dist/chessground.min.css">
 
-    <!-- Local chess.js and chessboard.js -->
-    <script src="chess.min.js"></script>
-    <script src="chessboard.js"></script>
+<!-- Local chess.js -->
+<script src="chess.min.js"></script>
 
-    <style>
-        body { font-family: Arial; text-align: center; padding: 40px; }
-        #board { width: 400px; margin: 20px auto; }
-        button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
-        pre { font-size: 16px; white-space: pre-wrap; word-wrap: break-word; }
-    </style>
+<!-- Chessground JS -->
+<script src="https://cdn.jsdelivr.net/npm/chessground@8.1.0/dist/chessground.min.js"></script>
+
+<style>
+  body { font-family: Arial; text-align: center; padding: 40px; }
+  #board { width: 400px; height: 400px; margin: 20px auto; }
+  button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+  pre { font-size: 16px; white-space: pre-wrap; word-wrap: break-word; }
+</style>
 </head>
 <body>
 
@@ -29,7 +31,7 @@
 <pre id="moves"></pre>
 
 <script>
-let board;
+let cg;
 
 // --- Your 2 PGNs ---
 const pgns = [
@@ -48,7 +50,6 @@ function generate() {
     const gameIndex = Math.floor(Math.random() * games.length);
     const moves = games[gameIndex];
 
-    // Ensure there are at least 6 half-moves remaining
     if (moves.length < 6) {
         alert("Game too short!");
         return;
@@ -61,11 +62,16 @@ function generate() {
         chess.move(moves[i]);
     }
 
-    // Initialize or update the board
-    if (!board) {
-        board = Chessboard('board', { position: chess.fen(), draggable: false });
+    // Initialize or update the Chessground board
+    if (!cg) {
+        cg = Chessground(document.getElementById('board'), {
+            orientation: 'white',
+            draggable: false,
+            viewOnly: true,
+            fen: chess.fen()
+        });
     } else {
-        board.position(chess.fen());
+        cg.set({ fen: chess.fen() });
     }
 
     // Display next 6 half-moves
@@ -73,7 +79,6 @@ function generate() {
     document.getElementById("moves").textContent = next6.join(" ");
 }
 
-// Setup button
 window.onload = function() {
     document.getElementById("genBtn").onclick = generate;
     generate();
