@@ -10,17 +10,22 @@
 
 body{
 font-family:Arial;
-text-align:center;
 background:#222;
 color:white;
+text-align:center;
+}
+
+#container{
+display:flex;
+justify-content:center;
+gap:40px;
+margin-top:20px;
 }
 
 #board{
 display:grid;
 grid-template-columns:repeat(8,70px);
 width:560px;
-margin:auto;
-margin-top:20px;
 }
 
 .square{
@@ -37,12 +42,30 @@ cursor:pointer;
 
 .square img{
 width:55px;
-height:55px;
 pointer-events:none;
 }
 
 .selected{
-box-shadow: inset 0 0 0 5px rgba(0,255,0,0.6);
+box-shadow: inset 0 0 0 5px rgba(0,255,0,0.7);
+}
+
+.correctSquare{
+box-shadow: inset 0 0 0 5px rgba(0,255,0,0.9);
+}
+
+.wrongSquare{
+box-shadow: inset 0 0 0 5px rgba(255,0,0,0.9);
+}
+
+#movesTable{
+border-collapse:collapse;
+height:fit-content;
+}
+
+#movesTable td{
+border:1px solid #555;
+padding:6px 12px;
+min-width:50px;
 }
 
 button{
@@ -52,79 +75,127 @@ font-size:16px;
 cursor:pointer;
 }
 
-</style>
+.notification{
+position:fixed;
+bottom:20px;
+right:20px;
+padding:14px 18px;
+border-radius:8px;
+font-weight:bold;
+color:white;
+box-shadow:0 4px 12px rgba(0,0,0,0.4);
+opacity:0;
+transform:translateY(20px);
+transition:all 0.3s ease;
+z-index:1000;
+}
 
+.notification.show{
+opacity:1;
+transform:translateY(0);
+}
+
+.correct{background:#2ecc71;}
+.wrong{background:#e74c3c;}
+
+</style>
 </head>
 
 <body>
 
-<h1>Chess Visualisation Trainer</h1>
+<h1>Visualisation Trainer</h1>
+
+<div id="container">
 
 <div id="board"></div>
 
-<h3 id="moves"></h3>
+<table id="movesTable"></table>
 
-<button onclick="startQuestions()">I Visualised It</button>
+</div>
+
+<button id="visualisedBtn" onclick="startQuestions()">I Visualised It</button>
 
 <h2 id="question"></h2>
 
-<button onclick="checkAnswer()">Submit</button>
+<button id="submitBtn" onclick="checkAnswer()">Submit</button>
 
 <script>
 
-const chess = new Chess()
+const chess=new Chess()
 
-let finalChess = null
-let selectedSquares = []
-let correctSquares = []
+let finalChess=null
+let selectedSquares=[]
+let correctSquares=[]
+let movedPieces=[]
+let generatedMoves=[]
 
-const files = "abcdefgh"
+let startMoveNumber=1
+let startTurn="w"
 
-const pieceImages = {
-wp:"https://images.chesscomfiles.com/chess-themes/pieces/cburnett/150/wp.png",
-bp:"https://images.chesscomfiles.com/chess-themes/pieces/cburnett/150/bp.png",
-wn:"https://images.chesscomfiles.com/chess-themes/pieces/cburnett/150/wn.png",
-bn:"https://images.chesscomfiles.com/chess-themes/pieces/cburnett/150/bn.png",
-wb:"https://images.chesscomfiles.com/chess-themes/pieces/cburnett/150/wb.png",
-bb:"https://images.chesscomfiles.com/chess-themes/pieces/cburnett/150/bb.png",
-wr:"https://images.chesscomfiles.com/chess-themes/pieces/cburnett/150/wr.png",
-br:"https://images.chesscomfiles.com/chess-themes/pieces/cburnett/150/br.png",
-wq:"https://images.chesscomfiles.com/chess-themes/pieces/cburnett/150/wq.png",
-bq:"https://images.chesscomfiles.com/chess-themes/pieces/cburnett/150/bq.png",
-wk:"https://images.chesscomfiles.com/chess-themes/pieces/cburnett/150/wk.png",
-bk:"https://images.chesscomfiles.com/chess-themes/pieces/cburnett/150/bk.png"
+const files="abcdefgh"
+
+const pieceImages={
+
+wp:"https://lichess1.org/assets/piece/cburnett/wP.svg",
+bp:"https://lichess1.org/assets/piece/cburnett/bP.svg",
+
+wn:"https://lichess1.org/assets/piece/cburnett/wN.svg",
+bn:"https://lichess1.org/assets/piece/cburnett/bN.svg",
+
+wb:"https://lichess1.org/assets/piece/cburnett/wB.svg",
+bb:"https://lichess1.org/assets/piece/cburnett/bB.svg",
+
+wr:"https://lichess1.org/assets/piece/cburnett/wR.svg",
+br:"https://lichess1.org/assets/piece/cburnett/bR.svg",
+
+wq:"https://lichess1.org/assets/piece/cburnett/wQ.svg",
+bq:"https://lichess1.org/assets/piece/cburnett/bQ.svg",
+
+wk:"https://lichess1.org/assets/piece/cburnett/wK.svg",
+bk:"https://lichess1.org/assets/piece/cburnett/bK.svg"
+
 }
+
+const games=[
+
+`1. e4 g6 2. d4 Bg7 3. Nc3 e6 4. f4 Ne7 5. Nf3 d5 6. Bd3 O-O 7. O-O b6
+8. Be3 a5 9. Qe1 Ba6 10. Bxa6 Nxa6 11. Rd1 Nb4 12. Qf2 dxe4
+13. Nxe4 Nxa2 14. c3 a4 15. Ra1 Qd5 16. Ned2 b5`,
+
+`1. d4 d5 2. Bf4 c5 3. e3 cxd4 4. exd4 Nc6 5. c3 Bf5
+6. Qb3 Qd7 7. Nf3 f6 8. Nbd2 g5 9. Bg3 h5 10. h3 Bg6
+11. Be2 Nh6 12. O-O-O Nf5 13. Bh2 a6 14. Nf1 b5
+15. Bd3 Rc8 16. Kb1 e6 17. Ne3 b4 18. Nxf5 Bxf5`
+
+]
 
 function renderBoard(){
 
-const boardDiv = document.getElementById("board")
+const boardDiv=document.getElementById("board")
 boardDiv.innerHTML=""
 
-const board = chess.board()
+const board=chess.board()
 
 for(let r=0;r<8;r++){
-
 for(let c=0;c<8;c++){
 
-const square = document.createElement("div")
+const square=document.createElement("div")
 
 square.classList.add("square")
 square.classList.add((r+c)%2?"dark":"light")
 
-const coord = files[c] + (8-r)
+const coord=files[c]+(8-r)
 
-square.dataset.square = coord
+square.dataset.square=coord
 
-square.onclick = () => toggleSquare(square)
+square.onclick=()=>toggleSquare(square)
 
-const piece = board[r][c]
+const piece=board[r][c]
 
 if(piece){
 
-const img = document.createElement("img")
-
-img.src = pieceImages[piece.color + piece.type]
-
+const img=document.createElement("img")
+img.src=pieceImages[piece.color+piece.type]
 square.appendChild(img)
 
 }
@@ -132,21 +203,22 @@ square.appendChild(img)
 boardDiv.appendChild(square)
 
 }
-
 }
 
 }
 
 function toggleSquare(el){
 
-const sq = el.dataset.square
+const sq=el.dataset.square
 
 if(selectedSquares.includes(sq)){
 
-selectedSquares = selectedSquares.filter(s=>s!==sq)
+selectedSquares=selectedSquares.filter(s=>s!==sq)
 el.classList.remove("selected")
 
 }else{
+
+if(selectedSquares.length>=correctSquares.length)return
 
 selectedSquares.push(sq)
 el.classList.add("selected")
@@ -155,99 +227,261 @@ el.classList.add("selected")
 
 }
 
-function generateMoves(){
+function displayMoves(moves){
 
-const temp = new Chess(chess.fen())
+const table=document.getElementById("movesTable")
+table.innerHTML=""
 
-let moves = []
+let moveNum=startMoveNumber
+let index=0
 
-for(let i=0;i<6;i++){
+if(startTurn==="b"){
 
-const legal = temp.moves()
+const row=document.createElement("tr")
+row.innerHTML=`<td>${moveNum}</td><td>...</td><td>${moves[0]}</td>`
+table.appendChild(row)
 
-const move = legal[Math.floor(Math.random()*legal.length)]
-
-temp.move(move)
-
-moves.push(move)
+index=1
+moveNum++
 
 }
 
-finalChess = temp
+while(index<moves.length){
 
-return moves
+const white=moves[index]
+const black=moves[index+1]||""
+
+const row=document.createElement("tr")
+row.innerHTML=`<td>${moveNum}</td><td>${white}</td><td>${black}</td>`
+table.appendChild(row)
+
+index+=2
+moveNum++
+
+}
+
+}
+
+function getRandomGamePosition(){
+
+const game=games[Math.floor(Math.random()*games.length)]
+
+const temp=new Chess()
+
+temp.load_pgn(game)
+
+const history=temp.history()
+
+const randomMove=Math.floor(Math.random()*(history.length-6))
+
+temp.reset()
+
+for(let i=0;i<randomMove;i++){
+temp.move(history[i])
+}
+
+startMoveNumber=Math.floor(randomMove/2)+1
+startTurn=temp.turn()
+
+return temp
+
+}
+
+function generateMoves(){
+
+const temp=new Chess(chess.fen())
+
+generatedMoves=[]
+movedPieces=[]
+
+for(let i=0;i<6;i++){
+
+const legal=temp.moves({verbose:true})
+const move=legal[Math.floor(Math.random()*legal.length)]
+
+temp.move(move)
+
+generatedMoves.push(move.san)
+movedPieces.push(move.color+move.piece)
+
+}
+
+finalChess=temp
+
+return generatedMoves
 
 }
 
 function startPosition(){
 
-chess.reset()
+const startPos=getRandomGamePosition()
+
+chess.load(startPos.fen())
 
 selectedSquares=[]
 correctSquares=[]
 
 renderBoard()
 
-const moves = generateMoves()
+const moves=generateMoves()
 
-document.getElementById("moves").textContent =
-"Visualise these moves: " + moves.join(" ")
+displayMoves(moves)
 
 document.getElementById("question").textContent=""
 
+document.getElementById("submitBtn").textContent="Submit"
+
+document.getElementById("visualisedBtn").style.display="inline-block"
+
+}
+
+function getQuestionPool(){
+return [...new Set(movedPieces)]
 }
 
 function startQuestions(){
 
-if(!finalChess) return
+const pool=getQuestionPool()
 
-generatePawnQuestion()
+const piece=pool[Math.floor(Math.random()*pool.length)]
+
+askPieceLocation(piece)
 
 }
 
-function generatePawnQuestion(){
+function askPieceLocation(piece){
 
-const board = finalChess.board()
+const board=finalChess.board()
 
-let pawns=[]
+let squares=[]
 
 for(let r=0;r<8;r++){
 for(let c=0;c<8;c++){
 
-const p = board[r][c]
+const p=board[r][c]
 
-if(p && p.type==="p" && p.color==="w"){
-
-pawns.push(files[c] + (8-r))
-
+if(p && (p.color+p.type)===piece){
+squares.push(files[c]+(8-r))
 }
 
 }
 }
 
-correctSquares = pawns
+correctSquares=squares
+selectedSquares=[]
 
-document.getElementById("question").textContent =
-"Where are the WHITE PAWNS? (click squares)"
+const color=piece[0]=="w"?"WHITE":"BLACK"
+
+const names={
+p:"PAWNS",
+n:"KNIGHTS",
+b:"BISHOPS",
+r:"ROOKS",
+q:"QUEEN",
+k:"KING"
+}
+
+document.getElementById("question").textContent=
+"Where are the "+color+" "+names[piece[1]]+"?"
+
+}
+
+function showCard(message,type){
+
+const card=document.createElement("div")
+card.classList.add("notification")
+card.classList.add(type)
+card.textContent=message
+
+document.body.appendChild(card)
+
+setTimeout(()=>card.classList.add("show"),10)
+
+setTimeout(()=>{
+card.classList.remove("show")
+setTimeout(()=>card.remove(),300)
+},2000)
+
+}
+
+function highlightResults(){
+
+const squares=document.querySelectorAll(".square")
+
+squares.forEach(sq=>{
+
+const coord=sq.dataset.square
+
+if(correctSquares.includes(coord)){
+sq.classList.add("correctSquare")
+}
+
+if(selectedSquares.includes(coord) && !correctSquares.includes(coord)){
+sq.classList.add("wrongSquare")
+}
+
+})
+
+}
+
+function animateMoves(){
+
+const temp=new Chess(chess.fen())
+
+let i=0
+
+function step(){
+
+if(i>=generatedMoves.length)return
+
+temp.move(generatedMoves[i])
+
+chess.load(temp.fen())
+
+renderBoard()
+
+i++
+
+setTimeout(step,600)
+
+}
+
+step()
 
 }
 
 function checkAnswer(){
 
-const user = [...selectedSquares].sort().join()
-const correct = [...correctSquares].sort().join()
+const btn=document.getElementById("submitBtn")
 
-if(user === correct){
+if(btn.textContent==="Next"){
 
-alert("Correct!")
-
-}else{
-
-alert("Wrong. Correct squares: " + correctSquares.join(", "))
+startPosition()
+return
 
 }
 
-startPosition()
+const user=[...selectedSquares].sort().join()
+const correct=[...correctSquares].sort().join()
+
+if(user===correct){
+showCard("✓ Correct!","correct")
+}else{
+showCard("✗ Correct: "+correctSquares.join(", "),"wrong")
+}
+
+highlightResults()
+
+document.getElementById("question").textContent=""
+document.getElementById("visualisedBtn").style.display="none"
+
+setTimeout(()=>{
+
+animateMoves()
+
+btn.textContent="Next"
+
+},1200)
 
 }
 
