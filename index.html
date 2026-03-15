@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Chess Visualisation Trainer</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+
+<style>
+
+body{
+font-family:Arial;
+text-align:center;
+background:#222;
+color:white;
+}
+
+#board{
+display:grid;
+grid-template-columns:repeat(8,70px);
+width:560px;
+margin:auto;
+margin-top:20px;
+}
+
+.square{
+width:70px;
+height:70px;
+display:flex;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+}
+
+.light{background:#f0d9b5}
+.dark{background:#b58863}
+
+.square img{
+width:55px;
+height:55px;
+pointer-events:none;
+}
+
+.selected{
+box-shadow: inset 0 0 0 5px rgba(0,255,0,0.6);
+}
+
+button{
+padding:10px 20px;
+margin:10px;
+font-size:16px;
+cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Chess Visualisation Trainer</h1>
+
+<div id="board"></div>
+
+<h3 id="moves"></h3>
+
+<button onclick="startQuestions()">I Visualised It</button>
+
+<h2 id="question"></h2>
+
+<button onclick="checkAnswer()">Submit</button>
+
+<script>
+
+const chess = new Chess()
+
+let finalChess = null
+let selectedSquares = []
+let correctSquares = []
+
+const files = "abcdefgh"
+
+const pieceImages = {
+wp:"https://images.chesscomfiles.com/chess-themes/pieces/cburnett/150/wp.png",
+bp:"https://images.chesscomfiles.com/chess-themes/pieces/cburnett/150/bp.png",
+wn:"https://images.chesscomfiles.com/chess-themes/pieces/cburnett/150/wn.png",
+bn:"https://images.chesscomfiles.com/chess-themes/pieces/cburnett/150/bn.png",
+wb:"https://images.chesscomfiles.com/chess-themes/pieces/cburnett/150/wb.png",
+bb:"https://images.chesscomfiles.com/chess-themes/pieces/cburnett/150/bb.png",
+wr:"https://images.chesscomfiles.com/chess-themes/pieces/cburnett/150/wr.png",
+br:"https://images.chesscomfiles.com/chess-themes/pieces/cburnett/150/br.png",
+wq:"https://images.chesscomfiles.com/chess-themes/pieces/cburnett/150/wq.png",
+bq:"https://images.chesscomfiles.com/chess-themes/pieces/cburnett/150/bq.png",
+wk:"https://images.chesscomfiles.com/chess-themes/pieces/cburnett/150/wk.png",
+bk:"https://images.chesscomfiles.com/chess-themes/pieces/cburnett/150/bk.png"
+}
+
+function renderBoard(){
+
+const boardDiv = document.getElementById("board")
+boardDiv.innerHTML=""
+
+const board = chess.board()
+
+for(let r=0;r<8;r++){
+
+for(let c=0;c<8;c++){
+
+const square = document.createElement("div")
+
+square.classList.add("square")
+square.classList.add((r+c)%2?"dark":"light")
+
+const coord = files[c] + (8-r)
+
+square.dataset.square = coord
+
+square.onclick = () => toggleSquare(square)
+
+const piece = board[r][c]
+
+if(piece){
+
+const img = document.createElement("img")
+
+img.src = pieceImages[piece.color + piece.type]
+
+square.appendChild(img)
+
+}
+
+boardDiv.appendChild(square)
+
+}
+
+}
+
+}
+
+function toggleSquare(el){
+
+const sq = el.dataset.square
+
+if(selectedSquares.includes(sq)){
+
+selectedSquares = selectedSquares.filter(s=>s!==sq)
+el.classList.remove("selected")
+
+}else{
+
+selectedSquares.push(sq)
+el.classList.add("selected")
+
+}
+
+}
+
+function generateMoves(){
+
+const temp = new Chess(chess.fen())
+
+let moves = []
+
+for(let i=0;i<6;i++){
+
+const legal = temp.moves()
+
+const move = legal[Math.floor(Math.random()*legal.length)]
+
+temp.move(move)
+
+moves.push(move)
+
+}
+
+finalChess = temp
+
+return moves
+
+}
+
+function startPosition(){
+
+chess.reset()
+
+selectedSquares=[]
+correctSquares=[]
+
+renderBoard()
+
+const moves = generateMoves()
+
+document.getElementById("moves").textContent =
+"Visualise these moves: " + moves.join(" ")
+
+document.getElementById("question").textContent=""
+
+}
+
+function startQuestions(){
+
+if(!finalChess) return
+
+generatePawnQuestion()
+
+}
+
+function generatePawnQuestion(){
+
+const board = finalChess.board()
+
+let pawns=[]
+
+for(let r=0;r<8;r++){
+for(let c=0;c<8;c++){
+
+const p = board[r][c]
+
+if(p && p.type==="p" && p.color==="w"){
+
+pawns.push(files[c] + (8-r))
+
+}
+
+}
+}
+
+correctSquares = pawns
+
+document.getElementById("question").textContent =
+"Where are the WHITE PAWNS? (click squares)"
+
+}
+
+function checkAnswer(){
+
+const user = [...selectedSquares].sort().join()
+const correct = [...correctSquares].sort().join()
+
+if(user === correct){
+
+alert("Correct!")
+
+}else{
+
+alert("Wrong. Correct squares: " + correctSquares.join(", "))
+
+}
+
+startPosition()
+
+}
+
+startPosition()
+
+</script>
+
+</body>
+</html>
