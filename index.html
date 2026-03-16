@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Chess Visualisation Trainer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+
+<link rel="stylesheet" href="css/styles.css">
+
+</head>
+
+<body>
+
+<h1>Visualisation Trainer</h1>
+
+<div id="hamburger">&#9776;</div>
+
+<div id="menuPanel">
+<h3>Settings</h3>
+
+<label>Half moves to visualise:</label>
+<input type="number" id="halfMoveInput" min="1" max="8" value="6">
+
+<button onclick="closeMenu()">Close</button>
+</div>
+
+<div id="container">
+
+<div id="board"></div>
+
+<table id="movesTable"></table>
+
+</div>
+
+<button id="visualisedBtn" onclick="startQuestions()">I Visualised It</button>
+
+<h2 id="question"></h2>
+
+<button id="submitBtn" onclick="checkAnswer()">Submit</button>
+
+<script src="data/games.js"></script>
+
+<script src="js/board.js"></script>
+<script src="js/gameLoader.js"></script>
+<script src="js/questions.js"></script>
+<script src="js/animation.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>
