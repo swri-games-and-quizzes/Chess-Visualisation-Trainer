@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Chess Visualisation Trainer</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+
+<link rel="stylesheet" href="css/styles.css">
+
+</head>
+
+<body>
+
+<h1>Visualisation Trainer</h1>
+
+<div id="container">
+
+<div id="board"></div>
+
+<table id="movesTable"></table>
+
+</div>
+
+<button id="visualisedBtn" onclick="startQuestions()">I Visualised It</button>
+
+<h2 id="question"></h2>
+
+<button id="submitBtn" onclick="checkAnswer()">Submit</button>
+
+<script src="data/games.js"></script>
+
+<script src="js/board.js"></script>
+<script src="js/gameLoader.js"></script>
+<script src="js/questions.js"></script>
+<script src="js/animation.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>
