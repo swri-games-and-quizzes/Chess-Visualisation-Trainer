@@ -71,8 +71,18 @@ displayMoves(moves)
 document.getElementById("question").textContent=""
 
 document.getElementById("submitBtn").textContent="Submit"
+document.getElementById("submitBtn").style.display="none"
 
 document.getElementById("visualisedBtn").style.display="inline-block"
+
+}
+
+function onVisualisedClick(){
+
+startQuestions()
+
+document.getElementById("visualisedBtn").style.display="none"
+document.getElementById("submitBtn").style.display="inline-block"
 
 }
 
