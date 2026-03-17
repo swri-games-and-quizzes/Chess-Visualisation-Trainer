@@ -30,7 +30,7 @@ function startQuestions(){
 
 const pool=getQuestionPool()
 
-const attackPool=pool.filter(piece=>piece[1]!=="p")
+const attackPool=pool.filter(piece=>piece[1]!=="p" && piece[1]!=="k")
 const askAttack=Math.random()<0.7
 
 if(askAttack && attackPool.length>0){
