@@ -99,10 +99,12 @@ return
 
 /* FIX: prevent submit with no squares selected */
 
-if(selectedSquares.length===0){
+if(selectedSquares.length===0 && correctSquares.length>0){
 showCard("Select at least one square","wrong")
 return
 }
+
+btn.style.display="none"
 
 const user=[...selectedSquares].sort().join()
 const correct=[...correctSquares].sort().join()
@@ -123,6 +125,7 @@ setTimeout(()=>{
 animateMoves()
 
 btn.textContent="Next"
+btn.style.display="inline-block"
 
 },1200)
 
