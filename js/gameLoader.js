@@ -1,3 +1,5 @@
+let mastersGameCache=[]
+
 function displayMoves(moves){
 
 const table=document.getElementById("movesTable")
@@ -33,9 +35,61 @@ moveNum++
 
 }
 
-function getRandomGamePosition(){
+function getFallbackGame(){
+return games[Math.floor(Math.random()*games.length)]
+}
 
-const game=games[Math.floor(Math.random()*games.length)]
+async function fetchMastersGamePgn(){
+
+if(mastersGameCache.length===0){
+
+const response=await fetch("https://explorer.lichess.ovh/masters?moves=12&topGames=50&recentGames=50")
+
+if(!response.ok) throw new Error("Could not load Lichess masters index")
+
+const data=await response.json()
+const ids=[...(data.topGames||[]),...(data.recentGames||[])]
+.map(g=>g.id)
+.filter(Boolean)
+
+mastersGameCache=ids.sort(()=>Math.random()-0.5)
+
+}
+
+while(mastersGameCache.length>0){
+
+const gameId=mastersGameCache.pop()
+
+try{
+
+const pgnResponse=await fetch(`https://explorer.lichess.ovh/masters/pgn/${gameId}`)
+
+if(!pgnResponse.ok) continue
+
+const pgn=(await pgnResponse.text()).trim()
+
+if(pgn) return pgn
+
+}catch(err){
+continue
+}
+
+}
+
+throw new Error("No masters PGN could be loaded")
+
+}
+
+async function getRandomGamePosition(){
+
+let game
+
+try{
+game=await fetchMastersGamePgn()
+}catch(err){
+console.warn("Falling back to bundled games:",err)
+game=getFallbackGame()
+}
 
 const temp=new Chess()
 
@@ -43,7 +97,27 @@ temp.load_pgn(game)
 
 const history=temp.history()
 
-/* ensure there are always 6 moves remaining */
+if(history.length<=halfMoveCount){
+
+const fallbackTemp=new Chess()
+fallbackTemp.load_pgn(getFallbackGame())
+const fallbackHistory=fallbackTemp.history()
+
+if(fallbackHistory.length<=halfMoveCount){
+throw new Error("No game has enough moves for current halfMoveCount")
+}
+
+return buildPositionFromHistory(fallbackTemp,fallbackHistory)
+
+}
+
+return buildPositionFromHistory(temp,history)
+
+}
+
+function buildPositionFromHistory(temp,history){
+
+/* ensure there are always N moves remaining */
 const randomMove=Math.floor(Math.random()*(history.length-halfMoveCount))
 
 temp.reset()
@@ -55,7 +129,7 @@ temp.move(history[i])
 startMoveNumber=Math.floor(randomMove/2)+1
 startTurn=temp.turn()
 
-/* store the real next 6 moves from the game */
+/* store the real next N moves from the game */
 generatedMoves=history.slice(randomMove,randomMove+halfMoveCount)
 
 /* determine which pieces moved */
