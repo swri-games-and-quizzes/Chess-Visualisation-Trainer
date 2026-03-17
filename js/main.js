@@ -53,9 +53,21 @@ sq.classList.add("wrongSquare")
 
 }
 
-function startPosition(){
+async function startPosition(){
 
-const startPos=getRandomGamePosition()
+document.getElementById("question").textContent="Loading masters game..."
+document.getElementById("submitBtn").style.display="none"
+document.getElementById("visualisedBtn").style.display="none"
+
+let startPos
+
+try{
+startPos=await getRandomGamePosition()
+}catch(err){
+showCard("Could not load game","wrong")
+console.error(err)
+return
+}
 
 chess.load(startPos.fen())
 
