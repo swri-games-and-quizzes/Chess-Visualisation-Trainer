@@ -2,16 +2,47 @@ function getQuestionPool(){
 return [...new Set(movedPieces)]
 }
 
+function getRandomPiece(pool,pawnWeight=1){
+
+const weighted=[]
+
+for(let piece of pool){
+const weight=piece[1]==="p"?pawnWeight:1
+weighted.push({piece,weight})
+}
+
+const total=weighted.reduce((sum,item)=>sum+item.weight,0)
+
+if(total===0) return null
+
+let roll=Math.random()*total
+
+for(let item of weighted){
+roll-=item.weight
+if(roll<=0) return item.piece
+}
+
+return weighted[weighted.length-1].piece
+
+}
+
 function startQuestions(){
 
 const pool=getQuestionPool()
 
-const piece=pool[Math.floor(Math.random()*pool.length)]
+const attackPool=pool.filter(piece=>piece[1]!=="p")
+const askAttack=Math.random()<0.7
 
-if(Math.random()<0.5){
-askPieceLocation(piece)
-}else{
+if(askAttack && attackPool.length>0){
+const piece=getRandomPiece(attackPool)
 askPieceAttacks(piece)
+return
+}
+
+const piece=getRandomPiece(pool,0.5)
+
+if(piece){
+askPieceLocation(piece)
 }
 
 }
