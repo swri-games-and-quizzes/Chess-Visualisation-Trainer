@@ -1,18 +1,18 @@
 const files="abcdefgh"
 
-const pieceGlyphs={
-wp:"♙",
-bp:"♟",
-wn:"♘",
-bn:"♞",
-wb:"♗",
-bb:"♝",
-wr:"♖",
-br:"♜",
-wq:"♕",
-bq:"♛",
-wk:"♔",
-bk:"♚"
+const pieceImages={
+wp:"https://lichess1.org/assets/piece/cburnett/wP.svg",
+bp:"https://lichess1.org/assets/piece/cburnett/bP.svg",
+wn:"https://lichess1.org/assets/piece/cburnett/wN.svg",
+bn:"https://lichess1.org/assets/piece/cburnett/bN.svg",
+wb:"https://lichess1.org/assets/piece/cburnett/wB.svg",
+bb:"https://lichess1.org/assets/piece/cburnett/bB.svg",
+wr:"https://lichess1.org/assets/piece/cburnett/wR.svg",
+br:"https://lichess1.org/assets/piece/cburnett/bR.svg",
+wq:"https://lichess1.org/assets/piece/cburnett/wQ.svg",
+bq:"https://lichess1.org/assets/piece/cburnett/bQ.svg",
+wk:"https://lichess1.org/assets/piece/cburnett/wK.svg",
+bk:"https://lichess1.org/assets/piece/cburnett/bK.svg"
 }
 
 function renderBoard(){
@@ -40,12 +40,10 @@ const piece=board[r][c]
 
 if(piece){
 
-const glyph=document.createElement("span")
-glyph.textContent=pieceGlyphs[piece.color+piece.type]
-glyph.style.fontSize="40px"
-glyph.style.lineHeight="1"
-glyph.style.userSelect="none"
-square.appendChild(glyph)
+const img=document.createElement("img")
+img.src=pieceImages[piece.color+piece.type]
+img.alt=piece.color+piece.type
+square.appendChild(img)
 
 }
 
