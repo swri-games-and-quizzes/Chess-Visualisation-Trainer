@@ -248,6 +248,7 @@ for(let attack of attacks) attackedSquares.add(attack)
 }
 
 correctSquares=[...attackedSquares].sort()
+if(correctSquares.length===0) return false
 selectedSquares=[]
 
 const color=piece[0]=="w"?"WHITE":"BLACK"
@@ -284,9 +285,10 @@ for(let attack of attacks) attackedEnemySquares.add(attack)
 }
 
 correctSquares=[...attackedEnemySquares].sort()
+if(correctSquares.length===0) return false
 selectedSquares=[]
 
-const color=piece[0]==="w"?"WHITE":"BLACK"
+const color=piece[0]==="w"?"white":"black"
 
 const names={
 p:"PAWNS",
@@ -298,7 +300,7 @@ k:"KING"
 }
 
 document.getElementById("question").textContent=
-"Which enemy pieces/pawns are attacked by "+color+" "+names[piece[1]]+"?"
+"Which enemy pieces/pawns are attacked by "+color+"'s "+names[piece[1]]+"?"
 
 return true
 
@@ -315,14 +317,21 @@ const blackAttackers=getAttackersOnSquare(target,"b",board)
 
 if(whiteAttackers.length===blackAttackers.length) return false
 
-const winningColor=whiteAttackers.length>blackAttackers.length?"WHITE":"BLACK"
+const winningColor=whiteAttackers.length>blackAttackers.length?"w":"b"
 const winningSquares=whiteAttackers.length>blackAttackers.length?whiteAttackers:blackAttackers
 
 correctSquares=[...new Set(winningSquares)].sort()
+if(correctSquares.length===0) return false
 selectedSquares=[]
 
+const targetFile=files.indexOf(target[0])
+const targetRank=8-parseInt(target[1])
+const targetPiece=board[targetRank][targetFile]
+const relation=(targetPiece && targetPiece.color===winningColor)?"defending":"attacking"
+const colorLabel=winningColor==="w"?"white":"black"
+
 document.getElementById("question").textContent=
-"Who has more attackers on "+target+"? Select the "+winningColor+" attacking piece squares."
+"Select all "+colorLabel+" pieces "+relation+" "+target+"."
 
 return true
 
