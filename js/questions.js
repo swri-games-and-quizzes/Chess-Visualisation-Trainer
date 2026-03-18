@@ -94,9 +94,10 @@ function inBounds(r,c){
 return r>=0 && r<8 && c>=0 && c<8
 }
 
-function getAttackedSquaresForPiece(piece,square,board,{onlyEnemyOccupied=false}={}){
+function getAttackedSquaresForPiece(piece,square,board,options){
 
 const attackedSquares=new Set()
+const onlyEnemyOccupied=options && options.onlyEnemyOccupied===true
 
 const c=files.indexOf(square[0])
 const r=8-parseInt(square[1])
