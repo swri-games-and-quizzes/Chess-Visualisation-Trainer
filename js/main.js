@@ -53,16 +53,15 @@ sq.classList.add("wrongSquare")
 
 }
 
-async function startPosition(){
+function startPosition(){
 
-document.getElementById("question").textContent="Loading masters game..."
 document.getElementById("submitBtn").style.display="none"
 document.getElementById("visualisedBtn").style.display="none"
 
 let startPos
 
 try{
-startPos=await getRandomGamePosition()
+startPos=getRandomGamePosition()
 }catch(err){
 showCard("Could not load game","wrong")
 console.error(err)
