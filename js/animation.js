@@ -45,11 +45,11 @@ function animateMoves() {
     const dx = endLeft - startLeft;
     const dy = endTop - startTop;
 
-    // create floating clone
-    const clone = pieceImg.cloneNode(true);
-    clone.style.position = "fixed";
-    clone.style.left = `${startLeft}px`;
-    clone.style.top = `${startTop}px`;
+ // create floating clone␊
+    const clone = pieceImg.cloneNode(true);␊
+    clone.style.position = "fixed";␊
+    clone.style.left = `${startLeft}px`;␊
+    clone.style.top = `${startTop}px`;␊
     clone.style.width = `${cloneWidth}px`;
     clone.style.height = `${cloneHeight}px`;
     clone.style.pointerEvents = "none";
@@ -57,17 +57,26 @@ function animateMoves() {
     // Lichess-like timing/curve
     clone.style.transition = "transform 0.45s cubic-bezier(.25,.8,.25,1)";
     clone.style.transform = "translate(0px, 0px)";
+    clone.style.willChange = "transform";
 
     document.body.appendChild(clone);
 
     // hide original piece while clone is visible (prevents duplicate)
     pieceImg.style.visibility = "hidden";
 
-    // start animation next frame
+    // start animation on a separate frame so browsers don't collapse
+    // initial and final transform states (which causes teleporting)
     requestAnimationFrame(() => {
-      clone.style.transform = `translate(${dx}px, ${dy}px)`;
+      // force style/layout flush before applying destination transform
+      clone.getBoundingClientRect();
+      requestAnimationFrame(() => {
+        clone.style.transform = `translate(${dx}px, ${dy}px)`;
+      });
     });
 
+
+
+    
     // finish when transition ends (or fallback)
     let settled = false;
     function finishAnimation() {
