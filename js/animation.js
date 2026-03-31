@@ -20,7 +20,7 @@ function animateMoves() {
       i++;
       setTimeout(step, 80);
       return;
-    }
+}
 
     // Measure BEFORE any DOM changes (center-to-center)
     const startImgRect = pieceImg.getBoundingClientRect();
@@ -45,7 +45,7 @@ function animateMoves() {
     const dx = endLeft - startLeft;
     const dy = endTop - startTop;
 
- // create floating clone␊
+    // create floating clone␊
     const clone = pieceImg.cloneNode(true);␊
     clone.style.position = "fixed";␊
     clone.style.left = `${startLeft}px`;␊
@@ -74,9 +74,6 @@ function animateMoves() {
       });
     });
 
-
-
-    
     // finish when transition ends (or fallback)
     let settled = false;
     function finishAnimation() {
@@ -100,6 +97,3 @@ function animateMoves() {
     // fallback in case transitionend doesn't fire
     setTimeout(finishAnimation, 700);
   } // step()
-
-  step();
-}
