@@ -1,4 +1,3 @@
-// js/animation.js
 function animateMoves() {
   const temp = new Chess(chess.fen());
   let i = 0;
