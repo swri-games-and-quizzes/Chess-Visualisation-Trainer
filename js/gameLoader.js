@@ -70,6 +70,7 @@ startTurn=temp.turn()
 
 /* store the real next N moves from the game */
 generatedMoves=history.slice(randomMove,randomMove+halfMoveCount)
+generatedMoveData=[]
 
 /* determine which pieces moved */
 movedPieces=[]
@@ -79,6 +80,14 @@ const tracker=new Chess(temp.fen())
 for(let m of generatedMoves){
 
 const move=tracker.move(m,{sloppy:true})
+if(!move) continue
+generatedMoveData.push({
+from:move.from,
+to:move.to,
+san:move.san,
+flags:move.flags,
+promotion:move.promotion
+})
 
 movedPieces.push(move.color+move.piece)
 
