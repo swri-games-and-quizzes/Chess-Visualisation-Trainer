@@ -5,6 +5,7 @@ let selectedSquares=[]
 let correctSquares=[]
 let movedPieces=[]
 let generatedMoves=[]
+let generatedMoveData=[]
 
 let startMoveNumber=1
 let startTurn="w"
@@ -133,10 +134,10 @@ document.getElementById("visualisedBtn").style.display="none"
 
 setTimeout(()=>{
 
-animateMoves()
-
 btn.textContent="Next"
 btn.style.display="inline-block"
+
+animateMoves()
 
 },1200)
 
