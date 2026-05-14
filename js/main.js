@@ -133,10 +133,10 @@ document.getElementById("visualisedBtn").style.display="none"
 
 setTimeout(()=>{
 
-animateMoves()
-
 btn.textContent="Next"
 btn.style.display="inline-block"
+
+animateMoves()
 
 },1200)
 
