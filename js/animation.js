@@ -108,7 +108,17 @@ function animateMoves() {
 
     try {
       // play next half-move on the temp instance so we know move.from / move.to
-      const move = temp.move(generatedMoves[i], { sloppy: true });
+      const moveData = generatedMoveData[i];
+      const move = moveData
+        ? temp.move(
+            {
+              from: moveData.from,
+              to: moveData.to,
+              promotion: moveData.promotion
+            },
+            { sloppy: true }
+          )
+        : temp.move(generatedMoves[i], { sloppy: true });
 
       // if a move cannot be parsed, skip animation for it but keep playback moving
       if (!move) {

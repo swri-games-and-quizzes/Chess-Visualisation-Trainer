@@ -5,6 +5,7 @@ let selectedSquares=[]
 let correctSquares=[]
 let movedPieces=[]
 let generatedMoves=[]
+let generatedMoveData=[]
 
 let startMoveNumber=1
 let startTurn="w"
